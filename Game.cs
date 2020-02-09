@@ -13,7 +13,7 @@ namespace Tetris
             Yellow,
             Green,
             Cyan,
-            Blue, 
+            Blue,
             Orange
         }
 
@@ -24,7 +24,7 @@ namespace Tetris
 
         private Random _rnd = new Random();
 
-        private System.Threading.Timer _gameLoop;
+        private readonly System.Threading.Timer _gameLoop;
 
         private Piece _currentPiece;
 
@@ -39,7 +39,42 @@ namespace Tetris
             {
                 if (!_currentPiece.SoftDrop())
                 {
+                    CheckForCompletedLines();
                     AddNextPiece();
+                }
+            }
+        }
+
+        private void CheckForCompletedLines()
+        {
+            bool IsRowCompleted(int row)
+            {
+                for (int column = 0; column < NumberOfCellsWide; column++)
+                    if (_board[column, row] == Cell.Empty) return false;
+                return true;
+            }
+
+            void ShuffleDownRows(int startRow)
+            {
+                for (int row = startRow; row < NumberOfCellsHigh - 1; row++)
+                {
+                    for (int column = 0; column < NumberOfCellsWide; column++)
+                    {
+                        _board[column, row] = _board[column, row + 1];
+                    }
+                }
+
+                for (int column = 0; column < NumberOfCellsWide; column++)
+                {
+                    _board[column, NumberOfCellsWide - 1] = Cell.Empty;
+                }
+            }
+
+            for (int row = 0; row < NumberOfCellsHigh; row++)
+            {
+                if (IsRowCompleted(row))
+                {
+                    ShuffleDownRows(row);
                 }
             }
         }
@@ -59,6 +94,7 @@ namespace Tetris
                 case Keys.Down:
                     if (!_currentPiece.SoftDrop())
                     {
+                        CheckForCompletedLines();
                         AddNextPiece();
                     }
                     break;
