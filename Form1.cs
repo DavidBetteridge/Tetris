@@ -23,8 +23,6 @@ namespace Tetris
             _renderLoop.Interval = 16; //40fps
             _renderLoop.Enabled = true;
             _renderLoop.Tick += _renderLoop_Tick;
-
-            _game.AddNextPiece();
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -40,6 +38,7 @@ namespace Tetris
             
             _boardRenderer.RenderBackground(g, this.ClientSize.Width, this.ClientSize.Height);
             _boardRenderer.RenderBlocks(g, this.ClientSize.Width, this.ClientSize.Height, _game);
+            _boardRenderer.RenderPreview(g, this.ClientSize.Width, this.ClientSize.Height, _game);
 
             myBuffer.Render();
         }

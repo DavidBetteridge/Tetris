@@ -43,8 +43,8 @@ namespace Tetris
             {
                 Locations = new CellLocation[]
                 {
-                                new CellLocation(0,-1),
-                                new CellLocation(1,-1),
+                                new CellLocation(0,1),
+                                new CellLocation(1,1),
                                 new CellLocation(0,0),
                                 new CellLocation(-1,0),
                 },
@@ -58,8 +58,8 @@ namespace Tetris
             {
                 Locations = new CellLocation[]
                 {
-                                new CellLocation(0,-1),
-                                new CellLocation(-1,-1),
+                                new CellLocation(0,1),
+                                new CellLocation(-1,1),
                                 new CellLocation(0,0),
                                 new CellLocation(1,0),
                 },
@@ -73,7 +73,7 @@ namespace Tetris
             {
                 Locations = new CellLocation[]
                 {
-                                new CellLocation(-1,-1),
+                                new CellLocation(-1,1),
                                 new CellLocation(-1,0),
                                 new CellLocation(0,0),
                                 new CellLocation(1,0),

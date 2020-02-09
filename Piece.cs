@@ -9,53 +9,54 @@ namespace Tetris
         private int _centerX = 5;
         private int _rotation = 0;
         private Cell[,] _board;
-        private readonly TetriminoDefinition _tetriminoDefinition;
+        public TetriminoDefinition Definition { get; private set; }
 
         public Piece(Cell[,] board, TetriminoDefinition definition)
         {
             _board = board;
-            _tetriminoDefinition = definition;
+            Definition = definition;
         }
 
         public bool SoftDrop()
         {
-            DrawOnBoard(Cell.Empty);
+            RemoveFromBoard();
             var newLocation = CalculateRotationAndTransformation(_centerX, _centerY - 1);
             var canBeDropped = AllLocationsValid(newLocation);
             if (canBeDropped)
             {
                 _centerY--;
             }
-            DrawOnBoard(_tetriminoDefinition.Colour);
+
+            DrawOnBoard();
 
             return canBeDropped;
         }
 
         public void MoveLeft()
         {
-            DrawOnBoard(Cell.Empty);
+            RemoveFromBoard();
             var newLocation = CalculateRotationAndTransformation(_centerX - 1, _centerY);
             if (AllLocationsValid(newLocation))
             {
                 _centerX--;
             }
-            DrawOnBoard(_tetriminoDefinition.Colour);
+            DrawOnBoard();
         }
 
         public void MoveRight()
         {
-            DrawOnBoard(Cell.Empty);
+            RemoveFromBoard();
             var newLocation = CalculateRotationAndTransformation(_centerX + 1, _centerY);
             if (AllLocationsValid(newLocation))
             {
                 _centerX++;
             }
-            DrawOnBoard(_tetriminoDefinition.Colour);
+            DrawOnBoard();
         }
 
         public void RotateAntiClockwise()
         {
-            DrawOnBoard(Cell.Empty);
+            RemoveFromBoard();
 
             // Rotate
 
@@ -63,22 +64,33 @@ namespace Tetris
             // If still not valid then not allowed.
 
             _rotation = (_rotation + 3) % 4;
-            DrawOnBoard(_tetriminoDefinition.Colour);
+            var rotated = CalculateRotationAndTransformation(_centerX, _centerY);
+            DrawOnBoard();
         }
 
         public void RotateClockwise()
         {
-            DrawOnBoard(Cell.Empty);
+            RemoveFromBoard();
             _rotation = (_rotation + 1) % 4;
-            DrawOnBoard(_tetriminoDefinition.Colour);
+            var rotated = CalculateRotationAndTransformation(_centerX, _centerY);
+            DrawOnBoard();
         }
 
-        internal void DrawOnBoard(Cell setTo)
+        private void DrawOnBoard()
         {
-            var rotated = CalculateRotationAndTransformation(_centerX, _centerY);
-            foreach (var location in rotated)
+            var newLocation = CalculateRotationAndTransformation(_centerX, _centerY); 
+            foreach (var location in newLocation)
             {
-                _board[location.X, location.Y] = setTo;
+                _board[location.X, location.Y] = Definition.Colour;
+            }
+        }
+
+        private void RemoveFromBoard()
+        {
+            var currentLocation = CalculateRotationAndTransformation(_centerX, _centerY);
+            foreach (var location in currentLocation)
+            {
+                _board[location.X, location.Y] = Cell.Empty;
             }
         }
 
@@ -97,9 +109,9 @@ namespace Tetris
             return cellLocations.All(IsLocationValid);
         }
 
-        internal CellLocation[] CalculateRotationAndTransformation(int xOffset, int yOffset)
+        private CellLocation[] CalculateRotationAndTransformation(int xOffset, int yOffset)
         {
-            return _tetriminoDefinition.Locations.Select(location =>
+            return Definition.Locations.Select(location =>
                 _rotation switch
                 {
                     0 => new CellLocation(xOffset + location.X, yOffset + location.Y),

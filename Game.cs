@@ -28,8 +28,13 @@ namespace Tetris
 
         private Piece _currentPiece;
 
+        public Piece NextPiece { get; private set; }
+
         public Game()
         {
+            AddNextPiece();
+            AddNextPiece();  //Called twice to generate both the current and the next piece
+
             _gameLoop = new System.Threading.Timer(Tick, null, 0, 500);
         }
 
@@ -114,7 +119,7 @@ namespace Tetris
 
         public Cell CellColour(int column, int row) => _board[column, row];
 
-        public void AddNextPiece()
+        private void AddNextPiece()
         {
             var pieceType = _rnd.Next(0, 7);
             var definition = pieceType switch
@@ -129,7 +134,9 @@ namespace Tetris
                 _ => throw new Exception($"{pieceType} was not expected."),
             };
 
-            _currentPiece = new Piece(this._board, definition);
+            _currentPiece = NextPiece;
+
+            NextPiece = new Piece(this._board, definition);
         }
 
     }
