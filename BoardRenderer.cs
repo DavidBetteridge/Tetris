@@ -8,10 +8,20 @@ namespace Tetris
     {
         private readonly Image _image;
         private readonly Font _previewFont = new Font("Segoe UI", 16F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
+        private readonly Font _scoreFont = new Font("Segoe UI", 20F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
 
         public BoardRenderer()
         {
             _image = Image.FromFile("background.jpg");
+        }
+
+        public void RenderScore(Graphics g, int totalClientWidth, int totalClientHeight, Game _game)
+        {
+            var cellSize = (totalClientHeight - 100) / NumberOfCellsHigh;
+            var totalWidth = cellSize * NumberOfCellsWide;
+            var x1 = (totalClientWidth - totalWidth) / 2;
+
+            g.DrawString($"Score : {_game.Score}", _scoreFont, Brushes.Black, x1 + totalWidth + 100, 240);
         }
 
         public void RenderPreview(Graphics g, int totalClientWidth, int totalClientHeight, Game _game)

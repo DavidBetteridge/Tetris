@@ -30,6 +30,8 @@ namespace Tetris
 
         public Piece NextPiece { get; private set; }
 
+        public int Score { get; private set; }
+
         public Game()
         {
             AddNextPiece();
@@ -52,13 +54,6 @@ namespace Tetris
 
         private void CheckForCompletedLines()
         {
-            bool IsRowCompleted(int row)
-            {
-                for (int column = 0; column < NumberOfCellsWide; column++)
-                    if (_board[column, row] == Cell.Empty) return false;
-                return true;
-            }
-
             void ShuffleDownRows(int startRow)
             {
                 for (int row = startRow; row < NumberOfCellsHigh - 1; row++)
@@ -75,11 +70,65 @@ namespace Tetris
                 }
             }
 
+            UpdateScore();
+
             for (int row = 0; row < NumberOfCellsHigh; row++)
             {
                 if (IsRowCompleted(row))
                 {
                     ShuffleDownRows(row);
+                    row--;
+                }
+            }
+        }
+
+        private bool IsRowCompleted(int row)
+        {
+            for (int column = 0; column < NumberOfCellsWide; column++)
+                if (_board[column, row] == Cell.Empty) return false;
+            return true;
+        }
+        private bool IsRowEmpty(int row)
+        {
+            for (int column = 0; column < NumberOfCellsWide; column++)
+                if (_board[column, row] != Cell.Empty) return false;
+            return true;
+        }
+
+        private void UpdateScore()
+        {
+            var firstLevel = int.MaxValue;
+            var numberOfLines = 0;
+            var otherLinesWithPieces = 0;
+            for (int level = 0; level < NumberOfCellsHigh; level++)
+            {
+                if (IsRowCompleted(level))
+                {
+                    numberOfLines++;
+                    firstLevel = Math.Min(firstLevel, level);
+                }
+                else if (!IsRowEmpty(level))
+                {
+                    otherLinesWithPieces++;
+                }
+            }
+
+            if (numberOfLines > 0)
+            {
+                if (otherLinesWithPieces == 0)
+                {
+                    Score += 2000 * (firstLevel + 1);
+                }
+                else
+                {
+                    Score += numberOfLines switch
+                    {
+                        1 => 50 * (firstLevel + 1),
+                        2 => 150 * (firstLevel + 1),
+                        3 => 350 * (firstLevel + 1),
+                        4 => 1000 * (firstLevel + 1),
+                        _ => throw new Exception("How did you complete more than 4 lines with a single piece??"),
+                    };
                 }
             }
         }

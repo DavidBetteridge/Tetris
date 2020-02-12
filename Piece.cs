@@ -20,7 +20,7 @@ namespace Tetris
         public bool SoftDrop()
         {
             RemoveFromBoard();
-            var newLocation = CalculateRotationAndTransformation(_centerX, _centerY - 1);
+            var newLocation = CalculateRotationAndTransformation(_centerX, _centerY - 1, _rotation, CellOffset.Zero);
             var canBeDropped = AllLocationsValid(newLocation);
             if (canBeDropped)
             {
@@ -35,7 +35,7 @@ namespace Tetris
         public void MoveLeft()
         {
             RemoveFromBoard();
-            var newLocation = CalculateRotationAndTransformation(_centerX - 1, _centerY);
+            var newLocation = CalculateRotationAndTransformation(_centerX - 1, _centerY, _rotation, CellOffset.Zero);
             if (AllLocationsValid(newLocation))
             {
                 _centerX--;
@@ -46,7 +46,7 @@ namespace Tetris
         public void MoveRight()
         {
             RemoveFromBoard();
-            var newLocation = CalculateRotationAndTransformation(_centerX + 1, _centerY);
+            var newLocation = CalculateRotationAndTransformation(_centerX + 1, _centerY, _rotation, CellOffset.Zero);
             if (AllLocationsValid(newLocation))
             {
                 _centerX++;
@@ -58,27 +58,49 @@ namespace Tetris
         {
             RemoveFromBoard();
 
-            // Rotate
+            var newRotation = (_rotation + 3) % 4;
 
-            // If not valid,  apply offset(s)
-            // If still not valid then not allowed.
+            foreach (var offsets in Definition.Offsets)
+            {
+                var rotationOffset = offsets.GetForRotation(_rotation, clockWise: false);
+                var newLocation = CalculateRotationAndTransformation(_centerX, _centerY, newRotation, rotationOffset);
+                if (AllLocationsValid(newLocation))
+                {
+                    _centerX -= rotationOffset.X;
+                    _centerY -= rotationOffset.Y;
+                    _rotation = newRotation;
+                    break;
+                }
+            }
 
-            _rotation = (_rotation + 3) % 4;
-            var rotated = CalculateRotationAndTransformation(_centerX, _centerY);
             DrawOnBoard();
         }
 
         public void RotateClockwise()
         {
             RemoveFromBoard();
-            _rotation = (_rotation + 1) % 4;
-            var rotated = CalculateRotationAndTransformation(_centerX, _centerY);
+            
+            var newRotation = (_rotation + 1) % 4;
+
+            foreach (var offsets in Definition.Offsets)
+            {
+                var rotationOffset = offsets.GetForRotation(_rotation, clockWise: true);
+                var newLocation = CalculateRotationAndTransformation(_centerX, _centerY, newRotation, rotationOffset);
+                if (AllLocationsValid(newLocation))
+                {
+                    _centerX -= rotationOffset.X;
+                    _centerY -= rotationOffset.Y;
+                    _rotation = newRotation;
+                    break;
+                }
+            }
+
             DrawOnBoard();
         }
 
         private void DrawOnBoard()
         {
-            var newLocation = CalculateRotationAndTransformation(_centerX, _centerY); 
+            var newLocation = CalculateRotationAndTransformation(_centerX, _centerY, _rotation, CellOffset.Zero); 
             foreach (var location in newLocation)
             {
                 _board[location.X, location.Y] = Definition.Colour;
@@ -87,7 +109,7 @@ namespace Tetris
 
         private void RemoveFromBoard()
         {
-            var currentLocation = CalculateRotationAndTransformation(_centerX, _centerY);
+            var currentLocation = CalculateRotationAndTransformation(_centerX, _centerY, _rotation, CellOffset.Zero);
             foreach (var location in currentLocation)
             {
                 _board[location.X, location.Y] = Cell.Empty;
@@ -109,15 +131,15 @@ namespace Tetris
             return cellLocations.All(IsLocationValid);
         }
 
-        private CellLocation[] CalculateRotationAndTransformation(int xOffset, int yOffset)
+        private CellLocation[] CalculateRotationAndTransformation(int xOffset, int yOffset, int rotation, CellOffset rotationOffset)
         {
             return Definition.Locations.Select(location =>
-                _rotation switch
+                rotation switch
                 {
-                    0 => new CellLocation(xOffset + location.X, yOffset + location.Y),
-                    1 => new CellLocation(xOffset + location.Y, yOffset - location.X),
-                    2 => new CellLocation(xOffset - location.X, yOffset - location.Y),
-                    3 => new CellLocation(xOffset - location.Y, yOffset + location.X),
+                    0 => new CellLocation(-rotationOffset.X + xOffset + location.X, -rotationOffset.Y + yOffset + location.Y),
+                    1 => new CellLocation(-rotationOffset.X + xOffset + location.Y, -rotationOffset.Y + yOffset - location.X),
+                    2 => new CellLocation(-rotationOffset.X + xOffset - location.X, -rotationOffset.Y + yOffset - location.Y),
+                    3 => new CellLocation(-rotationOffset.X + xOffset - location.Y, -rotationOffset.Y + yOffset + location.X),
                     _ => throw new System.Exception($"Unexpected rotation - {_rotation}"),
                 }
             ).ToArray();

@@ -32,15 +32,24 @@ namespace Tetris
 
         private void _renderLoop_Tick(object sender, EventArgs e)
         {
-            var currentContext = BufferedGraphicsManager.Current;
-            using var myBuffer = currentContext.Allocate(this.CreateGraphics(), this.DisplayRectangle);
-            var g = myBuffer.Graphics;
-            
-            _boardRenderer.RenderBackground(g, this.ClientSize.Width, this.ClientSize.Height);
-            _boardRenderer.RenderBlocks(g, this.ClientSize.Width, this.ClientSize.Height, _game);
-            _boardRenderer.RenderPreview(g, this.ClientSize.Width, this.ClientSize.Height, _game);
+            try
+            {
+                var currentContext = BufferedGraphicsManager.Current;
+                using var myBuffer = currentContext.Allocate(this.CreateGraphics(), this.DisplayRectangle);
+                var g = myBuffer.Graphics;
 
-            myBuffer.Render();
+                _boardRenderer.RenderBackground(g, this.ClientSize.Width, this.ClientSize.Height);
+                _boardRenderer.RenderBlocks(g, this.ClientSize.Width, this.ClientSize.Height, _game);
+                _boardRenderer.RenderPreview(g, this.ClientSize.Width, this.ClientSize.Height, _game);
+                _boardRenderer.RenderScore(g, this.ClientSize.Width, this.ClientSize.Height, _game);
+
+                myBuffer.Render();
+            }
+            catch (System.ObjectDisposedException)
+            {
+                // App closing - this.CreateGraphics() will fail
+            }
+
         }
     }
 }
