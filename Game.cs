@@ -32,6 +32,8 @@ namespace Tetris
 
         public int Score { get; private set; }
 
+        private bool _enableTimer = true;
+
         public Game()
         {
             AddNextPiece();
@@ -42,7 +44,7 @@ namespace Tetris
 
         private void Tick(object state)
         {
-            if (_currentPiece is object)
+            if (_enableTimer && _currentPiece is object)
             {
                 if (!_currentPiece.SoftDrop())
                 {
@@ -135,6 +137,8 @@ namespace Tetris
 
         internal void HandleKey(Keys keyCode)
         {
+            _enableTimer = false;
+
             switch (keyCode)
             {
                 case Keys.Right:
@@ -143,6 +147,12 @@ namespace Tetris
 
                 case Keys.Left:
                     _currentPiece.MoveLeft();
+                    break;
+
+                case Keys.Space:
+                    _currentPiece.HardDrop();
+                    CheckForCompletedLines();
+                    AddNextPiece();
                     break;
 
                 case Keys.Down:
@@ -162,8 +172,11 @@ namespace Tetris
                     break;
 
                 default:
-                    return;
+                    break;
             }
+
+            _enableTimer = true;
+
         }
 
         public Cell CellColour(int column, int row) => _board[column, row];

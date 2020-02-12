@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using static Tetris.Game;
 
 namespace Tetris
@@ -30,6 +31,26 @@ namespace Tetris
             DrawOnBoard();
 
             return canBeDropped;
+        }
+
+
+        internal void HardDrop()
+        {
+            RemoveFromBoard();
+
+            var offset = 0;
+            CellLocation[] newLocation;
+            do
+            {
+                offset++;
+                newLocation = CalculateRotationAndTransformation(_centerX, _centerY - offset, _rotation, CellOffset.Zero);
+            } while (AllLocationsValid(newLocation));
+            offset--;
+
+            _centerY = _centerY - offset;
+
+            DrawOnBoard();
+
         }
 
         public void MoveLeft()
